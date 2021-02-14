@@ -34,31 +34,22 @@ public class Deque<Item> {
      */
     public void addToFront(Item item) {
     	//no more space in array; need to expand
-    	if (back == front - 1 || back == this.deque.length) {
-    		Item[] newA = extendArray();
-    		newA[front] = item;
+    	if (this.size == this.getArray().length) {
+    		Item[] newA = extendArray(item,"front");
     		this.deque = newA;
+    	}else if(this.size() == 0) {
+    		this.deque[front] = item;
     	}
-    	else if (this.size() == 0) {
-    		this.deque[0] = item;
+    	else if (front == 0) {
+    		this.deque[this.deque.length-1] = item;
+    		front = this.deque.length-1;
+    		
     	}
-    	//if the front of the deque is zero; we need to shift everything down
-    	else if (front == 0 && this.size() > 0) {
-    		Item[] newA = (Item[]) new Object[this.deque.length];
-    		newA[0] = item;
-    		for (int i = 0; i < this.size(); i++) {
-    			newA[i+1] = this.deque[i];
-    		}
-    		this.deque = newA;
-    	}
-    	//index behind the front is not out of range and does not equal back
-    	//if front - 1 == back; array is full
-    	else if (front - 1 >= 0 && front - 1 != back) {
+    	else if(this.deque[front-1] == null) {
     		this.deque[front-1] = item;
     		front--;
     	}
     	this.size++;
-    	this.back++;
     	
     }
 
@@ -67,7 +58,20 @@ public class Deque<Item> {
      *double the array capacity if the Deque is full
      ***/
     public void addToBack(Item item) {
-	//TODO: Implement this!
+    	if (this.size() == this.deque.length) {
+    		Item[] newA = extendArray(item,"back");
+    		this.deque = newA;
+    	
+    	}else if (back + 1 == this.deque.length) {
+    		this.back = 0;
+    		this.deque[0] = item;
+    	}
+    	else {
+    		this.deque[back+1] = item;
+    		back++;
+    	}
+    	//back++;
+    	size++;
     }
 
     /***
@@ -86,8 +90,12 @@ public class Deque<Item> {
     		retItem = this.deque[front];
     		this.deque[front] = null;
     		size--; 
-    		front++;
-    		if(this.size < (this.getArray().length/4)) {
+    		if (front + 1 == this.deque.length) {
+        		front = 0;
+        	}else {
+        		front++;
+        	}
+    		if(this.size < (this.getArray().length/4) && this.size() > 1) {
     			this.deque = reduceArray();
     		}
     	}
@@ -104,10 +112,23 @@ public class Deque<Item> {
      ***/
     //TODO: Implement this!
     public Item getLast() throws EmptyDequeException {
+    	Item retItem;
     	if (this.isEmpty()) {
     		throw new EmptyDequeException();
     	}
-    	return null;
+    	else {
+    		retItem = this.deque[back];
+    		this.deque[back] = null;
+    		size--;
+    		if(back == 0) {
+    			this.back = 0;
+    		}else {
+    			this.back--;
+    		}if(this.size < (this.getArray().length/4) && this.size() > 1) {
+    			this.deque = reduceArray();
+    		}
+    	}
+    	return retItem;
 
     }
     
@@ -135,6 +156,7 @@ public class Deque<Item> {
     	if (this.isEmpty()) {
     		throw new EmptyDequeException();
     	}
+    	//System.out.println("from peekFront--> front: "+ this.front);
     	return this.getArray()[front];
     }
 
@@ -146,8 +168,7 @@ public class Deque<Item> {
     	if (this.isEmpty()) {
     		throw new EmptyDequeException();
     	}
-    	// -1 because in my implementation , back == next free space at end
-    	return this.getArray()[back-1];
+    	return this.getArray()[back];
     }
     
     /***
@@ -176,18 +197,22 @@ public class Deque<Item> {
     public static void main(String[] args) throws EmptyDequeException {
 	//TO BE IMPLEMENTED
     	Deque<Integer> deque = new Deque<Integer>();
-    	for (int i = 0; i < 11; i++) {
+    	for (int i = 0; i < 12; i++) {
     		deque.addToFront(i);
-    		System.out.println(Arrays.toString(deque.getArray()));
-    	}
-    	System.out.println(deque.peekLast());
-    	for(int u = 0; u < 6; u ++) {
-    		deque.getFirst();
+    		//System.out.println(i + ": "+ Arrays.toString(deque.getArray()) + "SIZE: "+deque.size());
     	}
     	System.out.println(Arrays.toString(deque.getArray()));
-    	
-    	System.out.println(deque.peekLast());
     	System.out.println(deque.peekFirst());
+    	System.out.println(deque.peekLast());
+    	for (int i = 0; i < 11; i++) {
+    		deque.getLast();
+    	}
+    	//deque.getLast();
+//    	deque.addToBack(25);
+//    	deque.addToFront(44);
+    	System.out.println(Arrays.toString(deque.getArray()));
+    	System.out.println(deque.peekFirst());
+    	System.out.println(deque.peekLast());
     }	
     
     
@@ -195,20 +220,41 @@ public class Deque<Item> {
      * MY PRIVATE METHODS:
      */
     //Makes a new array; leaves the 0 index empty for easy insert for addToFront()
-    private Item[] extendArray() {
+    private Item[] extendArray(Item item,String mode) {
     	Item[] newA = (Item[]) new Object[size*2];
-		int newBack = 0;
-		for (int f = 1; f <= this.size() - front; f++) {
-			newA[f] = this.deque[(front+f)-1];
-			newBack++;
-		}
-		for (int b = 0; b > this.size() - back; b++) {
-			newA[newBack] = this.deque[back-b];
-			newBack++;
-		}
-		this.front = 0;
-		this.back = newBack;
-		return newA;
+    	int newIndex;
+    	if (mode.toLowerCase() == "front") {
+    		newA[0] = item;
+    		newIndex = 1;
+    	}else {
+    		newIndex = 0;
+    	}
+    	if (front > back) {
+    		for (int f = front; f < this.deque.length; f++) {
+    			newA[newIndex] = this.deque[f];
+    			newIndex++;
+    		}
+    		for (int b = 0; b <= back; b++) {
+    			newA[newIndex] = this.deque[b];
+    			newIndex++;
+    		}
+    	}else if (back > front) {
+    		for (int f = front; f < back; f++) {
+    			newA[newIndex] = this.deque[f];
+    			newIndex++;
+    		}
+    		for (int b = back; b < this.deque.length; b++) {
+    			newA[newIndex] = this.deque[b];
+    			newIndex++;
+    		}
+    	}
+    	this.front = 0;
+    	if (mode.toLowerCase().equals("back")) {
+    		newA[newIndex] = item;
+    		newIndex++;
+    	}
+    	this.back = newIndex -1;
+    	return newA;
     }
     
     private Item[] reduceArray() {
@@ -219,13 +265,23 @@ public class Deque<Item> {
     		newSize = 10;
     	}
     	Item[] newA = (Item[]) new Object[newSize];
-    	int newBack = 0;
-		for (int f = 0; f < this.size(); f++) {
-			newA[f] = this.deque[front+f];
-			newBack++;
-		}
-		this.front = 0;
-		this.back = newBack;
-		return newA;
+    	if (front < back) {
+    		for (int x = 0; x < newSize; x++) {
+    			newA[x] = this.deque[front+x];
+    		}
+    	}else if (front > back) {
+    		int newIndex = 0;
+    		for (int f = front; f < this.deque.length; f++) {
+    			newA[newIndex] = this.deque[front+newIndex];
+    			newIndex++;
+    		}
+    		for (int b = 0; b <= back; b++) {
+    			newA[newIndex] = this.deque[b];
+    			newIndex++;
+    		}
+    	}
+    	this.front = 0;
+    	this.back = this.size()-1;
+    	return newA;
     }
 }
