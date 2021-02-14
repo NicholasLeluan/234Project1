@@ -1,9 +1,12 @@
+import java.util.Arrays;
+
 @SuppressWarnings("unchecked")
 public class Deque<Item> {
     private Item[] deque;
     private int front;
     private int back;
     private int size;
+    private int arrayAccesses;
 
     /***
      *constructor: create an empty Deque with initial
@@ -22,6 +25,7 @@ public class Deque<Item> {
 		front = 0;
 		back = 0;
 		size = 0;
+		arrayAccesses = 0;
     }
     
     /***
@@ -29,22 +33,32 @@ public class Deque<Item> {
      *double the array capacity if Deque is full
      */
     public void addToFront(Item item) {
-	//TO BE IMPLEMENTED
     	//no more space in array; need to expand
-    	if (back == front - 1) {
+    	if (back == front - 1 || back == this.deque.length) {
     		Item[] newA = extendArray();
     		newA[front] = item;
+    		this.deque = newA;
+    	}
+    	else if (this.size() == 0) {
+    		this.deque[0] = item;
     	}
     	//if the front of the deque is zero; we need to shift everything down
-    	else if (size == 0) {
-    		this.deque[0] = item;
+    	else if (front == 0 && this.size() > 0) {
+    		Item[] newA = (Item[]) new Object[this.deque.length];
+    		newA[0] = item;
+    		for (int i = 0; i < this.size(); i++) {
+    			newA[i+1] = this.deque[i];
+    		}
+    		this.deque = newA;
     	}
     	//index behind the front is not out of range and does not equal back
     	//if front - 1 == back; array is full
     	else if (front - 1 >= 0 && front - 1 != back) {
     		this.deque[front-1] = item;
+    		front--;
     	}
     	this.size++;
+    	this.back++;
     	
     }
 
@@ -53,7 +67,7 @@ public class Deque<Item> {
      *double the array capacity if the Deque is full
      ***/
     public void addToBack(Item item) {
-	//TO BE IMPLEMENTED
+	//TODO: Implement this!
     }
 
     /***
@@ -65,8 +79,19 @@ public class Deque<Item> {
      *to be below the default capacity, which is 10
      ***/
     public Item getFirst() throws EmptyDequeException {
-	//TO BE IMPLEMENTED
-    	return null;
+    	Item retItem;
+    	if (this.isEmpty()) {
+    		throw new EmptyDequeException();
+    	}else {
+    		retItem = this.deque[front];
+    		this.deque[front] = null;
+    		size--; 
+    		front++;
+    		if(this.size < (this.getArray().length/4)) {
+    			this.deque = reduceArray();
+    		}
+    	}
+    	return retItem;
     }
 
      /***
@@ -77,8 +102,13 @@ public class Deque<Item> {
      *N is the array capacity, but do not resize it 
      *to be below the default capacity, which is 10
      ***/
+    //TODO: Implement this!
     public Item getLast() throws EmptyDequeException {
-	//TO BE IMPLEMENTED
+    	if (this.isEmpty()) {
+    		throw new EmptyDequeException();
+    	}
+    	return null;
+
     }
     
     /***
@@ -94,7 +124,7 @@ public class Deque<Item> {
      *number of elements currently in the Deque)
      ***/
     public int size() {
-    	return this.size();
+    	return this.size;
     }
 
     /***
@@ -102,7 +132,10 @@ public class Deque<Item> {
      *throw an EmptyDequeException if the Deque is empty
      */
     public Item peekFirst() throws EmptyDequeException {
-	//TO BE IMPLEMENTED
+    	if (this.isEmpty()) {
+    		throw new EmptyDequeException();
+    	}
+    	return this.getArray()[front];
     }
 
     /***
@@ -110,7 +143,11 @@ public class Deque<Item> {
      *throw an EmptyDequeException if the Deque is empty
      */
     public Item peekLast() throws EmptyDequeException {
-	//TO BE IMPLEMENTED
+    	if (this.isEmpty()) {
+    		throw new EmptyDequeException();
+    	}
+    	// -1 because in my implementation , back == next free space at end
+    	return this.getArray()[back-1];
     }
     
     /***
@@ -125,18 +162,32 @@ public class Deque<Item> {
      ***/
     public int getAccessCount() {
 	//TO BE IMPLEMENTED
+    	return this.arrayAccesses;
     }
     
     /***
      *reset the array access count to 0
      ***/
     public void resetAccessCount() {
-	//TO BE IMPLEMENTED
+		this.arrayAccesses = 0;
     }
     
     
-    public static void main(String[] args) {
+    public static void main(String[] args) throws EmptyDequeException {
 	//TO BE IMPLEMENTED
+    	Deque<Integer> deque = new Deque<Integer>();
+    	for (int i = 0; i < 11; i++) {
+    		deque.addToFront(i);
+    		System.out.println(Arrays.toString(deque.getArray()));
+    	}
+    	System.out.println(deque.peekLast());
+    	for(int u = 0; u < 6; u ++) {
+    		deque.getFirst();
+    	}
+    	System.out.println(Arrays.toString(deque.getArray()));
+    	
+    	System.out.println(deque.peekLast());
+    	System.out.println(deque.peekFirst());
     }	
     
     
@@ -146,17 +197,33 @@ public class Deque<Item> {
     //Makes a new array; leaves the 0 index empty for easy insert for addToFront()
     private Item[] extendArray() {
     	Item[] newA = (Item[]) new Object[size*2];
-		int newBack = 2;
+		int newBack = 0;
 		for (int f = 1; f <= this.size() - front; f++) {
 			newA[f] = this.deque[(front+f)-1];
 			newBack++;
 		}
-		//back = newBack;
 		for (int b = 0; b > this.size() - back; b++) {
 			newA[newBack] = this.deque[back-b];
 			newBack++;
 		}
-		
+		this.front = 0;
+		this.back = newBack;
+		return newA;
+    }
+    
+    private Item[] reduceArray() {
+    	int newSize;
+    	if (this.getArray().length / 4 > 10) {
+    		newSize = this.getArray().length / 2;	
+    	}else {
+    		newSize = 10;
+    	}
+    	Item[] newA = (Item[]) new Object[newSize];
+    	int newBack = 0;
+		for (int f = 0; f < this.size(); f++) {
+			newA[f] = this.deque[front+f];
+			newBack++;
+		}
 		this.front = 0;
 		this.back = newBack;
 		return newA;
