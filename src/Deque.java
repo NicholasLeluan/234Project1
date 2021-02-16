@@ -42,14 +42,14 @@ public class Deque<Item> {
     		this.deque = newA;
     	}else if(this.size() == 0) {
     		this.arrayAccesses++;
-    		this.deque[0] = item;
+    		this.deque[front] = item;
     	}
     	else if (front == 0) {
     		this.arrayAccesses++;
     		this.deque[this.deque.length-1] = item;
     		front = this.deque.length-1;
-    		
     	}
+ 
     	else if(this.deque[front-1] == null) {
     		this.arrayAccesses++;
     		this.deque[front-1] = item;
@@ -71,7 +71,8 @@ public class Deque<Item> {
     	else if(this.isEmpty()) {
     		this.deque[back] = item;
     		this.arrayAccesses++;
-    		back++;
+    		this.back = 0;
+    		//back++;
     	}
     	else if (back > front) {
     		if (back == this.deque.length - 1) {
@@ -137,7 +138,6 @@ public class Deque<Item> {
      *N is the array capacity, but do not resize it 
      *to be below the default capacity, which is 10
      ***/
-    //TODO: Implement this!
     public Item getLast() throws EmptyDequeException {
     	Item retItem;
     	if (this.isEmpty()) {
@@ -146,7 +146,6 @@ public class Deque<Item> {
     	else {
     		retItem = this.deque[back];
     		this.deque[back] = null;
-//    		this.arrayAccesses++;
     		this.arrayAccesses += 2;
     		size--;
     		if (back < front) {
