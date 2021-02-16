@@ -1,3 +1,4 @@
+import java.util.Arrays;
 import java.util.Random;
 
 public class Simulation2 {
@@ -27,6 +28,7 @@ public class Simulation2 {
 	 *4. each time through, we assume a person is vaccinated in each line with 25% probability
 	 ***/
 	while(count < numPeople || vaccCount < numVacc) {
+		//System.out.println(Arrays.toString(deques[1].getArray()));
 	    time++;
 	    if(count < numPeople) {
 		int x = gen.nextInt(4);
@@ -92,6 +94,7 @@ public class Simulation2 {
     //3: low-risk
     private static void newPerson() {
 	int risk = gen.nextInt(3) + 1;//risk assigned with uniform probability
+	//System.out.println(risk);
 	totByRank[risk-1]++;
 	count++;
 	//if there are no more vaccines, just count the person
@@ -105,8 +108,12 @@ public class Simulation2 {
 	}
 	//otherwise, add the new person to the back of the deque
 	//and keep track of the risk
+	if (risk == 1) {
+		deques[d].addToFront(risk);
+	}else {
 	deques[d].addToBack(risk);
 	inDeque[d]++;
+    }
     }
 
     //process the next person in deque i
