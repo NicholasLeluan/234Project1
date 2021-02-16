@@ -1,3 +1,7 @@
+/*
+ * Nicholas Leluan
+ * CSC 345 Spring 2021
+ */
 
 public class Part1B {
 
@@ -7,7 +11,7 @@ public class Part1B {
 		
 		//for getting plots points to graph;
 		// to use, uncomment!!
-		getPlots();
+		//getPlots();
 		
 		doSomething(N);
 

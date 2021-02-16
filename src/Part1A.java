@@ -1,3 +1,7 @@
+/*
+ * Nicholas Leluan
+ * CSC 345 Spring 2021
+ */
 
 public class Part1A {
 
@@ -6,7 +10,7 @@ public class Part1A {
 		Integer N = Integer.parseInt(args[0]);
 		//this is for getting the polots points for graph
 		//to use, uncomment!!
-		getPlots();
+		//getPlots();
 		
 		//Run N one time
 		doSomething(N);

@@ -1,4 +1,7 @@
-import java.util.Arrays;
+/*
+ * Nicholas Leluan
+ * CSC 345 Spring 2021
+ */
 
 @SuppressWarnings("unchecked")
 public class Deque<Item> {
@@ -232,68 +235,55 @@ public class Deque<Item> {
     
     
     public static void main(String[] args) throws EmptyDequeException {
-	//TO BE IMPLEMENTED
     	// c = capacity of the initial array
     	// N = number of addFront/addBacks
-    	int N = 2500;//Integer.parseInt(args[0]); 
-    	int c = 1;//Integer.parseInt(args[1]);
-    	Deque<Integer> deque = new Deque<Integer>(10);
-//    	testCounts(deque,c);
-    	for (int x = 0; x < 60; x++) {
-    		deque.addToFront(x);
-    	}
-    	System.out.println(Arrays.toString(deque.getArray()));
-    	for (int x = 0; x < 9; x++) {
-    		deque.getLast();
-    	}
-    	System.out.println(Arrays.toString(deque.getArray()));
-    	for (int d = 0; d < 5; d++) {
-    		deque.addToBack(d);
-    	}
-    	// TEST THIS!!!
-    	System.out.println(Arrays.toString(deque.getArray()));
-    	for (int x = 0; x < 10; x++) {
-    		deque.getFirst();
-    	}
-    	deque.addToBack(666);
-    	deque.addToFront(777);
-    	System.out.println(Arrays.toString(deque.getArray()));
+    	int N = Integer.parseInt(args[0]); 
+    	int c = Integer.parseInt(args[1]);
+    	Deque<Integer> deque = new Deque<Integer>(c);
+    	testCounts(deque,c,N);
     }	
     
     
     /*
      * MY PRIVATE METHODS:
      */
-    //Makes a new array; leaves the 0 index empty for easy insert for addToFront()
-    
-    private static void testCounts(Deque<Integer> deque, int c) throws EmptyDequeException {
-    	int[] nums = {1,10,25,35,50,100,150,200,300,400,500,750,1000};
+    /*
+     * this is to test the N input and the c input on the Deque class
+     */
+    private static void testCounts(Deque<Integer> deque, int c,int N) throws EmptyDequeException {
     	System.out.println("For capacity of: "+ c);
-    	for (int N : nums) {
-    		deque.resetAccessCount();
-    		System.out.println(String.format("Beginning test for range(N) %s: ", N));
-	    	for(int x = 0; x < N; x++) {
-	    		deque.addToFront(x);
-	    	}
-	    	for(int y = 0; y < N; y++) {
-	    		deque.addToBack(y);
-	    	}
-	    	System.out.println("After Adding: "+deque.getAccessCount());
-	    	deque.resetAccessCount();
-	    	for (int g = 0; g < N; g++) {
-	    		deque.getFirst();
-	    	}
-	    	for (int k = 0; k < N; k++) {
-	    		deque.getLast();
-	    	}
-	    	System.out.println("After Removing: " + deque.getAccessCount());
-	    	System.out.println();
+		deque.resetAccessCount();
+		System.out.println(String.format("Beginning test for range(N) %s: ", N));
+    	for(int x = 0; x < N; x++) {
+    		deque.addToFront(x);
     	}
+    	for(int y = 0; y < N; y++) {
+    		deque.addToBack(y);
+    	}
+    	System.out.println("After Adding: "+deque.getAccessCount());
+    	deque.resetAccessCount();
+    	for (int g = 0; g < N; g++) {
+    		deque.getFirst();
+    	}
+    	for (int k = 0; k < N; k++) {
+    		deque.getLast();
+    	}
+    	System.out.println("After Removing: " + deque.getAccessCount());
+    	System.out.println();
     	
     }
+    /*
+     * this private method is used when the array needs to be extended;
+     * this is the case when the deque.size() == deque.length
+     */
     private Item[] extendArray(Item item,String mode) {
+    	//ret array 
     	Item[] newA = (Item[]) new Object[size*2];
+    	//keeps track of the 
     	int newIndex;
+    	//mode helps me add to the right index without having to 
+    	//create another function to do adds
+    	//if mode is front; add the item to the zero index
     	if (mode.toLowerCase() == "front") {
     		newA[0] = item;
     		this.arrayAccesses++;
@@ -301,17 +291,21 @@ public class Deque<Item> {
     	}else {
     		newIndex = 0;
     	}
+    	//if there is a wrap around
     	if (front > back) {
+    		//get all the fronts
     		for (int f = front; f < this.deque.length; f++) {
     			this.arrayAccesses+=2;
     			newA[newIndex] = this.deque[f];
     			newIndex++;
     		}
+    		//get all the backs
     		for (int b = 0; b <= back; b++) {
     			this.arrayAccesses+=2;
     			newA[newIndex] = this.deque[b];
     			newIndex++;
     		}
+    	//no wrap around
     	}else if (back > front) {
     		for (int f = front; f < back; f++) {
     			this.arrayAccesses+=2;
@@ -324,16 +318,25 @@ public class Deque<Item> {
     			newIndex++;
     		}
     	}
+    	//no matter what, set the new front to zero
     	this.front = 0;
+    	//if the mode is back; add the item at the next available
+    	//index
     	if (mode.toLowerCase().equals("back")) {
     		this.arrayAccesses+=1;
     		newA[newIndex] = item;
     		newIndex++;
     	}
+    	//set the back to be current position
     	this.back = newIndex -1;
     	return newA;
     }
-    
+    /*
+     * called when an the deque size has gone below array.length/4
+     * if arra.length / 4 < 10 ; we set the capacity to 10
+     * the return array will always have the front as 0 and any subsequent 
+     * nodes leading after it in the right order.
+     */
     private Item[] reduceArray() {
     	int newSize;
     	if (this.getArray().length / 4 > 10) {
@@ -341,12 +344,15 @@ public class Deque<Item> {
     	}else {
     		newSize = 10;
     	}
+    	//ret array
     	Item[] newA = (Item[]) new Object[newSize];
+    	//our current deque has a wrap around
     	if (front < back) {
     		for (int x = 0; x < newSize; x++) {
     			this.arrayAccesses+=2;
     			newA[x] = this.deque[front+x];
     		}
+    	//current deque doesnt have a wrap around
     	}else if (front > back) {
     		int newIndex = 0;
     		for (int f = front; f < this.deque.length; f++) {
@@ -360,6 +366,7 @@ public class Deque<Item> {
     			newIndex++;
     		}
     	}
+    	//set the values of the new array
     	this.front = 0;
     	this.back = this.size()-1;
     	return newA;
